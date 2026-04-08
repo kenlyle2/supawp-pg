@@ -1,0 +1,117 @@
+/* SupaWP Social Login Styling */
+
+.supawp-social-login {
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.supawp-divider {
+    position: relative;
+    text-align: center;
+    margin: 15px 0;
+}
+
+.supawp-divider:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #e5e5e5;
+    z-index: 1;
+}
+
+.supawp-divider span {
+    position: relative;
+    padding: 0 10px;
+    z-index: 2;
+    color: #777;
+    font-size: 14px;
+}
+
+/* Updated Google Button Styling */
+.supawp-google-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 10px 16px;
+    background-color: #fff;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #3c4043;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    min-height: 40px;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.supawp-google-button:hover {
+    background-color: #f8f9fa;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.supawp-google-button:active {
+    background-color: #f1f3f4;
+}
+
+.supawp-google-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 12px;
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTcuNiA5LjJsLS4xLTEuOEg5djMuNGg0LjhDMTMuNiAxMiAxMyAxMyAxMiAxMy42djIuMmgzYTguOCA4LjggMCAwIDAgMi42LTYuNnoiIGZpbGw9IiM0Mjg1RjQiIGZpbGwtcnVsZT0ibm9uemVybyIvPjxwYXRoIGQ9Ik05IDE4YzIuNCAwIDQuNS0uOCA2LTIuMmwtMy0yLjJhNS40IDUuNCAwIDAgMS04LTIuOUgxVjEzYTkgOSAwIDAgMCA4IDV6IiBmaWxsPSIjMzRBODUzIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNNCAxMC43YTUuNCA1LjQgMCAwIDEgMC0zLjRWNUgxYTkgOSAwIDAgMCAwIDhsMy0yLjN6IiBmaWxsPSIjRkJCQzA1IiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNOSAzLjZjMS4zIDAgMi41LjQgMy40IDEuM0wxNSAyLjNBOSA5IDAgMCAwIDEgNWwzIDIuNGE1LjQgNS40IDAgMCAxIDUtMy43eiIgZmlsbD0iI0VBNDMzNSIgZmlsbC1ydWxlPSJub256ZXJvIi8+PHBhdGggZD0iTTAgMGgxOHYxOEgweiIvPjwvZz48L3N2Zz4=');
+    background-repeat: no-repeat;
+    background-size: contain;
+    flex-shrink: 0;
+}
+
+/* Loading state indication */
+.supawp-google-button.loading {
+    color: transparent;
+    pointer-events: none;
+}
+
+.supawp-google-button.loading:after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin: -8px 0 0 -8px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #4285f4;
+    animation: supawp-spin 0.8s linear infinite;
+}
+
+@keyframes supawp-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error message styling */
+.supawp-message.error {
+    color: #d93025;
+    font-size: 13px;
+    margin-top: 8px;
+    padding: 6px 10px;
+    background-color: rgba(217, 48, 37, 0.05);
+    border-radius: 4px;
+}
+
+.supawp-message.success {
+    color: #0f9d58;
+    font-size: 13px;
+    margin-top: 8px;
+    padding: 6px 10px;
+    background-color: rgba(15, 157, 88, 0.05);
+    border-radius: 4px;
+}

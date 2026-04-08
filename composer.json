@@ -1,0 +1,19 @@
+{
+    "name": "supawp/supawp",
+    "description": "SupaWP Plugin",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Dale Nguyen",
+            "email": "dale@techcater.com"
+        }
+    ],
+    "require": {
+        "firebase/php-jwt": "^6.11"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^12.1"
+    },
+    "version": "1.3.4"
+}

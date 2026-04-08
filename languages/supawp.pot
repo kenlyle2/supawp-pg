@@ -1,0 +1,533 @@
+# Copyright (C) 2025 techcater
+# This file is distributed under the same license as the SupaWP plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: SupaWP 1.5.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/supawp\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-10-03T20:08:14+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.10.0\n"
+"X-Domain: supawp\n"
+
+#. Plugin Name of the plugin
+#: init.php
+#: includes/admin/class.supawp-admin.php:33
+msgid "SupaWP"
+msgstr ""
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+#: init.php
+msgid "https://techcater.com"
+msgstr ""
+
+#. Description of the plugin
+#: init.php
+msgid "SupaWP is a plugin that helps to integrate Supabase features to WordPress"
+msgstr ""
+
+#. Author of the plugin
+#: init.php
+msgid "techcater"
+msgstr ""
+
+#: i18n/public_translations.php:14
+#: includes/public/class.shortcodes.php:47
+#: includes/public/class.shortcodes.php:121
+#: includes/public/class.shortcodes.php:213
+#: includes/public/class.shortcodes.php:244
+msgid "Email"
+msgstr ""
+
+#: i18n/public_translations.php:15
+#: includes/public/class.shortcodes.php:50
+#: includes/public/class.shortcodes.php:139
+#: includes/public/class.shortcodes.php:216
+#: includes/public/class.shortcodes.php:262
+msgid "Password"
+msgstr ""
+
+#: i18n/public_translations.php:16
+#: includes/public/class.shortcodes.php:143
+#: includes/public/class.shortcodes.php:266
+msgid "Confirm Password"
+msgstr ""
+
+#: i18n/public_translations.php:17
+#: includes/public/class.shortcodes.php:53
+#: includes/public/class.shortcodes.php:219
+#: includes/public/class.shortcodes.php:273
+msgid "Login"
+msgstr ""
+
+#: i18n/public_translations.php:18
+#: includes/public/class.shortcodes.php:146
+#: includes/public/class.shortcodes.php:223
+#: includes/public/class.shortcodes.php:269
+msgid "Sign Up"
+msgstr ""
+
+#: i18n/public_translations.php:19
+#: includes/public/class.shortcodes.php:376
+#: includes/public/class.shortcodes.php:381
+msgid "Logout"
+msgstr ""
+
+#: i18n/public_translations.php:20
+#: includes/public/class.shortcodes.php:196
+msgid "Sign in with Google"
+msgstr ""
+
+#: i18n/public_translations.php:21
+#: includes/public/class.shortcodes.php:197
+msgid "Sign up with Google"
+msgstr ""
+
+#: i18n/public_translations.php:22
+#: includes/public/class.shortcodes.php:202
+msgid "or"
+msgstr ""
+
+#: i18n/public_translations.php:23
+#: includes/public/class.shortcodes.php:222
+msgid "Don't have an account?"
+msgstr ""
+
+#: i18n/public_translations.php:24
+#: includes/public/class.shortcodes.php:272
+msgid "Already have an account?"
+msgstr ""
+
+#: i18n/public_translations.php:25
+msgid "Email is required"
+msgstr ""
+
+#: i18n/public_translations.php:26
+msgid "Password is required"
+msgstr ""
+
+#: i18n/public_translations.php:27
+msgid "Passwords do not match"
+msgstr ""
+
+#: i18n/public_translations.php:28
+msgid "Passwords match"
+msgstr ""
+
+#: i18n/public_translations.php:29
+msgid "Please enter a valid email address"
+msgstr ""
+
+#: i18n/public_translations.php:30
+msgid "Please enter a valid phone number"
+msgstr ""
+
+#: i18n/public_translations.php:31
+msgid "Phone number should be at least 10 digits"
+msgstr ""
+
+#: i18n/public_translations.php:32
+msgid "Login successful"
+msgstr ""
+
+#: i18n/public_translations.php:33
+msgid "Account created successfully"
+msgstr ""
+
+#: i18n/public_translations.php:34
+msgid "Logged out successfully"
+msgstr ""
+
+#: i18n/public_translations.php:35
+msgid "Login failed. Please check your credentials."
+msgstr ""
+
+#: i18n/public_translations.php:36
+msgid "Account creation failed. Please try again."
+msgstr ""
+
+#: i18n/public_translations.php:37
+msgid "Logout failed. Please try again."
+msgstr ""
+
+#: i18n/public_translations.php:38
+msgid "This email is already registered"
+msgstr ""
+
+#: i18n/public_translations.php:39
+msgid "Password is too weak. Please choose a stronger password."
+msgstr ""
+
+#: i18n/public_translations.php:40
+msgid "Too many requests. Please try again later."
+msgstr ""
+
+#: i18n/public_translations.php:41
+msgid "No account found with this email"
+msgstr ""
+
+#: i18n/public_translations.php:42
+msgid "Incorrect password"
+msgstr ""
+
+#: i18n/public_translations.php:43
+msgid "This account has been disabled"
+msgstr ""
+
+#: i18n/public_translations.php:44
+msgid "Please confirm your email address"
+msgstr ""
+
+#: i18n/public_translations.php:45
+msgid "Network error. Please check your connection."
+msgstr ""
+
+#: i18n/public_translations.php:46
+msgid "An unexpected error occurred. Please try again."
+msgstr ""
+
+#: i18n/public_translations.php:47
+#: includes/public/class.shortcodes.php:56
+msgid "Forgot Password?"
+msgstr ""
+
+#: i18n/public_translations.php:48
+#: includes/public/class.shortcodes.php:68
+msgid "Reset Password"
+msgstr ""
+
+#: i18n/public_translations.php:49
+msgid "Password reset email sent. Please check your inbox."
+msgstr ""
+
+#: i18n/public_translations.php:50
+#: includes/public/class.shortcodes.php:65
+msgid "Enter your email"
+msgstr ""
+
+#: i18n/public_translations.php:51
+#: includes/public/class.shortcodes.php:71
+msgid "Back to Login"
+msgstr ""
+
+#: i18n/public_translations.php:54
+msgid "Please configure your Supabase settings!"
+msgstr ""
+
+#: i18n/public_translations.php:55
+msgid "Failed to connect to Supabase. Please check your settings."
+msgstr ""
+
+#: i18n/public_translations.php:56
+msgid "Your session has expired. Please login again."
+msgstr ""
+
+#: i18n/public_translations.php:57
+msgid "Invalid response from Supabase. Please try again."
+msgstr ""
+
+#: i18n/public_translations.php:60
+msgid "WordPress auto-login failed. Please contact support."
+msgstr ""
+
+#: i18n/public_translations.php:61
+msgid "Failed to create WordPress user account."
+msgstr ""
+
+#: i18n/public_translations.php:62
+msgid "Failed to sync user data. Please try again."
+msgstr ""
+
+#: i18n/public_translations.php:65
+msgid "Loading..."
+msgstr ""
+
+#: i18n/public_translations.php:66
+msgid "Please wait..."
+msgstr ""
+
+#: i18n/public_translations.php:67
+msgid "Try again"
+msgstr ""
+
+#: i18n/public_translations.php:68
+msgid "Cancel"
+msgstr ""
+
+#: i18n/public_translations.php:69
+msgid "Continue"
+msgstr ""
+
+#: i18n/public_translations.php:70
+msgid "Save"
+msgstr ""
+
+#: i18n/public_translations.php:71
+msgid "Close"
+msgstr ""
+
+#: i18n/public_translations.php:74
+msgid "This field is required"
+msgstr ""
+
+#: i18n/public_translations.php:75
+msgid "Please enter a valid value"
+msgstr ""
+
+#: i18n/public_translations.php:76
+msgid "This field is too short"
+msgstr ""
+
+#: i18n/public_translations.php:77
+msgid "This field is too long"
+msgstr ""
+
+#: i18n/public_translations.php:78
+msgid "Submitting..."
+msgstr ""
+
+#: i18n/public_translations.php:79
+msgid "Form submitted successfully"
+msgstr ""
+
+#: i18n/public_translations.php:80
+msgid "Form submission failed. Please try again."
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:32
+msgid "SupaWP Settings"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:52
+#: includes/admin/class.supawp-admin.php:452
+msgid "General Settings"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:59
+msgid "Supabase URL"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:67
+msgid "Supabase Anon Key"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:75
+msgid "Enable WordPress Auto-Login"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:83
+#: includes/admin/class.supawp-admin.php:187
+msgid "Authentication Methods"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:91
+msgid "Redirect After Login"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:99
+msgid "Redirect After Logout"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:107
+#: includes/admin/class.supawp-admin.php:463
+msgid "Security Settings"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:114
+msgid "Product Key"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:122
+msgid "Supabase JWT Secret"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:130
+msgid "Supabase Service Role Key"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:139
+#: includes/admin/class.supawp-admin.php:474
+msgid "Sync Data Settings"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:146
+msgid "Users Table Name"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:155
+msgid "Sync Post Types"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:164
+msgid "Custom Post Types"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:190
+msgid "Email/Password"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:195
+msgid "Google"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:197
+msgid "Select which authentication methods to enable. Default is Email/Password only."
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:212
+msgid "Enter your Supabase project URL. Find this in your Supabase project settings."
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:226
+msgid "Enter your Supabase anonymous key. Find this in your Supabase project API settings."
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:241
+msgid "Automatically log users into WordPress after successful Supabase authentication."
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:243
+msgid "If checked, users signing in via Supabase will also be logged into their WordPress account."
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:257
+msgid "URL to redirect users after login. Leave blank for current page."
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:271
+msgid "URL to redirect users after logout. Leave blank for current page."
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:290
+msgid "Enter your Supabase project JWT Secret. Found in Project Settings > API > JWT Settings. <strong>Required for secure auto-login validation.</strong>"
+msgstr ""
+
+#. translators: %s: URL to Tech Cater account page
+#: includes/admin/class.supawp-admin.php:315
+msgid "Enter the product key for SupaWP. You can find your key in your account: %s"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:340
+msgid "<strong>Service Role Key</strong> - Used for secure server-side operations like post syncing. Found in Project Settings > API > Project API keys. <strong>Keep this secret and never expose to frontend!</strong>"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:359
+msgid "Enter the name of the Supabase table where user data should be synced. E.g. \"users\"."
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:360
+msgid "Learn more about saving user data to Supabase"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:384
+msgid "Select built-in post types to sync."
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:400
+msgid "Enter custom post types to sync, separated by commas."
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:432
+msgid "General"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:435
+msgid "Sync Data"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:438
+msgid "Security"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:484
+msgid "Save Settings"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:490
+msgid "Shortcodes"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:491
+msgid "Use these shortcodes in your pages or posts:"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:493
+msgid "Displays a login form"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:494
+msgid "Displays a signup form"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:495
+msgid "Displays a logout button"
+msgstr ""
+
+#: includes/admin/class.supawp-admin.php:496
+msgid "Displays a combined login/signup form"
+msgstr ""
+
+#: includes/public/class.api-user.php:64
+msgid "Required Supabase user ID or email is missing."
+msgstr ""
+
+#: includes/public/class.api-user.php:103
+msgid "Invalid request origin."
+msgstr ""
+
+#: includes/public/class.api-user.php:117
+msgid "Missing authentication timestamp."
+msgstr ""
+
+#: includes/public/class.api-user.php:144
+msgid "Invalid timestamp format."
+msgstr ""
+
+#: includes/public/class.api-user.php:156
+msgid "Authentication window expired. Please try logging in again."
+msgstr ""
+
+#: includes/public/class.api-user.php:170
+msgid "Invalid authentication token."
+msgstr ""
+
+#: includes/public/class.api-user.php:208
+msgid "Authentication conflict."
+msgstr ""
+
+#: includes/public/class.api-user.php:233
+msgid "Could not create WordPress user."
+msgstr ""
+
+#: includes/public/class.shortcodes.php:109
+#: includes/public/class.shortcodes.php:232
+msgid "First Name"
+msgstr ""
+
+#: includes/public/class.shortcodes.php:116
+#: includes/public/class.shortcodes.php:239
+msgid "Last Name"
+msgstr ""
+
+#: includes/public/class.shortcodes.php:127
+#: includes/public/class.shortcodes.php:250
+msgid "Phone Number"
+msgstr ""
+
+#: includes/public/class.shortcodes.php:134
+#: includes/public/class.shortcodes.php:257
+msgid "Company"
+msgstr ""
+
+#: includes/public/class.supabase.php:178
+msgid "WordPress logout successful."
+msgstr ""
+
+#: includes/public/class.supabase.php:181
+msgid "No active WordPress session found to log out."
+msgstr ""
