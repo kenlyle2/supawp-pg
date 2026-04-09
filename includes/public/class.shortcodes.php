@@ -22,6 +22,7 @@ class SupaWP_Shortcode {
     add_shortcode('supawp_signup', array(__CLASS__, 'signup_form'));
     add_shortcode('supawp_logout', array(__CLASS__, 'logout_button'));
     add_shortcode('supawp_auth', array(__CLASS__, 'auth_form'));
+    add_shortcode('supawp_launch_app', array(__CLASS__, 'launch_app_button'));
   }
 
   /**
@@ -730,6 +731,61 @@ class SupaWP_Shortcode {
       <button id="supawp-logout-button" data-redirect="<?php echo esc_url($redirect); ?>"><?php echo esc_html($text); ?></button>
     </div>
 <?php
+    return ob_get_clean();
+  }
+
+  /**
+   * [supawp_launch_app] shortcode
+   *
+   * Renders an "Open App" button when the user is logged into WordPress,
+   * or a "Log in" link when they are not.  Solves the UX problem where the
+   * app button would be meaningless (and broken) for unauthenticated visitors.
+   *
+   * Attributes:
+   *   app_text    — button label when logged in.     Default: "Open App"
+   *   login_text  — link label when not logged in.   Default: "Log In"
+   *   login_url   — destination when not logged in.  Default: supawp_redirect_after_logout setting, else /account-login/
+   *   class       — extra CSS class on the wrapper.  Default: ""
+   *
+   * Usage:
+   *   [supawp_launch_app]
+   *   [supawp_launch_app app_text="Go to PostGlider" login_text="Sign In" class="header-btn"]
+   */
+  public static function launch_app_button($atts) {
+    $options = get_option('supawp_options', array());
+
+    $default_login_url = !empty($options['supawp_redirect_after_logout'])
+      ? $options['supawp_redirect_after_logout']
+      : home_url('/account-login/');
+
+    $atts = shortcode_atts(array(
+      'app_text'   => __('Open App', 'supawp'),
+      'login_text' => __('Log In', 'supawp'),
+      'login_url'  => $default_login_url,
+      'class'      => '',
+    ), $atts, 'supawp_launch_app');
+
+    $wrapper_class = 'supawp-launch-app' . (!empty($atts['class']) ? ' ' . esc_attr($atts['class']) : '');
+    $launch_url    = add_query_arg('supawp_launch_app', '1', home_url('/'));
+
+    ob_start();
+    if (is_user_logged_in()) {
+      ?>
+      <div class="<?php echo esc_attr($wrapper_class); ?>">
+        <a href="<?php echo esc_url($launch_url); ?>" class="supawp-launch-app-btn">
+          <?php echo esc_html($atts['app_text']); ?>
+        </a>
+      </div>
+      <?php
+    } else {
+      ?>
+      <div class="<?php echo esc_attr($wrapper_class); ?>">
+        <a href="<?php echo esc_url($atts['login_url']); ?>" class="supawp-launch-app-login">
+          <?php echo esc_html($atts['login_text']); ?>
+        </a>
+      </div>
+      <?php
+    }
     return ob_get_clean();
   }
 }

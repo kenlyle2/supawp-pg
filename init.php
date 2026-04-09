@@ -15,7 +15,7 @@
  * Author URI:   https://techcater.com
  * Contributors: Tech Cater (@techcater)
  *
- * Version:      1.12.0
+ * Version:      1.12.0s
  * Tested up to: 6.8.3
  * Requires PHP: 7.4
  *
@@ -43,7 +43,7 @@ if (!function_exists('add_action')) {
   exit;
 }
 
-define('SUPAWP_VERSION', '1.12.0');
+define('SUPAWP_VERSION', '1.12.0s');
 define('SUPAWP_MINIMUM_WP_VERSION', '5.0.0');
 define('SUPAWP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SUPAWP_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -92,6 +92,12 @@ function init_supawp_plugin() {
   require_once SUPAWP_PLUGIN_DIR . 'includes/public/class.supawp-filters.php';
   if (class_exists('SupaWP_Filters')) {
     SupaWP_Filters::init();
+  }
+
+  // Load app launch handler
+  require_once SUPAWP_PLUGIN_DIR . 'includes/public/class.supawp-launch-app.php';
+  if (class_exists('SupaWP_Launch_App')) {
+    SupaWP_Launch_App::init();
   }
 
   // Admin configuration

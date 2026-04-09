@@ -61,6 +61,25 @@ class Supabase {
       );
     }
 
+    // Only load the Supabase auth JS on pages that actually contain a SupaWP shortcode.
+    // Sites where login is handled by an external app (e.g. a separate Next.js app)
+    // never place these shortcodes, so the JS never loads — avoiding auth-state loops
+    // on cart, checkout, account pages, and everywhere else.
+    global $post;
+    $supawp_shortcodes = array('supawp_login', 'supawp_signup', 'supawp_logout', 'supawp_auth', 'supawp_launch_app');
+    $has_supawp_shortcode = false;
+    if ($post) {
+      foreach ($supawp_shortcodes as $tag) {
+        if (has_shortcode($post->post_content, $tag)) {
+          $has_supawp_shortcode = true;
+          break;
+        }
+      }
+    }
+    if (!$has_supawp_shortcode) {
+      return;
+    }
+
     // --- Dynamic Script Loading Logic ---
 
     // Define default values including the product key
@@ -172,14 +191,30 @@ class Supabase {
       error_log('[SupaWP Frontend Logout] Nonce verification failed. Proceeding with logout check anyway.');
     }
 
-    // If user is logged in according to WP *now*, log them out.
     if (is_user_logged_in()) {
+      // Only log out users whose WordPress account is linked to Supabase.
+      // Native WordPress users (admins, editors) have no supabase_uid and must
+      // never be logged out by a Supabase auth-state change — they authenticate
+      // through WordPress directly and have no Supabase session to sync with.
+      $supabase_uid = get_user_meta(get_current_user_id(), 'supabase_uid', true);
+      if (empty($supabase_uid)) {
+        wp_send_json_success(array('message' => 'Native WordPress user — skipping Supabase-triggered logout.'));
+        return;
+      }
+
+      // If this user was logged in via the cross-domain session redirect (e.g. from a
+      // separate Next.js app), postglider.com's Supabase client will always see SIGNED_OUT
+      // because the session lives in the app's localStorage on a different origin.
+      // Honouring the logout here would undo the session immediately after it was set.
+      if (get_transient('supawp_cross_domain_' . get_current_user_id())) {
+        wp_send_json_success(array('message' => 'Cross-domain session active — skipping Supabase-triggered logout.'));
+        return;
+      }
+
       wp_logout();
-      // Ensure user meta is cleared immediately after logout
       wp_clear_auth_cookie();
       wp_send_json_success(array('message' => __('WordPress logout successful.', 'supawp')));
     } else {
-      // User already logged out in WP (or session expired before this check).
       wp_send_json_success(array('message' => __('No active WordPress session found to log out.', 'supawp')));
     }
   }

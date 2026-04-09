@@ -34,6 +34,14 @@ class SupaWP_Rest_Api_User {
       'callback' => array('SupaWP_Rest_Api_User', 'handle_auto_login'),
       'permission_callback' => '__return_true', // Public endpoint, security handled inside
     ));
+
+    // Redirect-based session endpoint: browser navigates here after Supabase auth,
+    // WordPress sets the auth cookie (SameSite=Lax, same-origin), then bounces back.
+    register_rest_route('supawp/v1', 'auth/session', array(
+      'methods'             => 'GET',
+      'callback'            => array('SupaWP_Rest_Api_User', 'handle_session_redirect'),
+      'permission_callback' => '__return_true',
+    ));
   }
 
   public static function handle_auto_login(WP_REST_Request $request) {
@@ -43,7 +51,14 @@ class SupaWP_Rest_Api_User {
     // Validate request (origin, timestamp, JWT). Returns decoded JWT object on success, or WP_Error.
     $decoded_jwt_or_error = self::validate_request($request);
     if (is_wp_error($decoded_jwt_or_error)) {
-      return $decoded_jwt_or_error; // Return WP_Error directly
+      $error_data   = $decoded_jwt_or_error->get_error_data();
+      $inner_detail = isset($error_data['detail']) ? $error_data['detail'] : '';
+      $error_msg    = $decoded_jwt_or_error->get_error_code() . ': ' . $decoded_jwt_or_error->get_error_message();
+      if ($inner_detail) {
+        $error_msg .= ' — ' . $inner_detail;
+      }
+      self::record_login_attempt('failed', $error_msg);
+      return $decoded_jwt_or_error;
     }
     // If validation passed, we have the decoded JWT object
     $decoded_jwt = $decoded_jwt_or_error;
@@ -81,9 +96,21 @@ class SupaWP_Rest_Api_User {
     // Update user metadata (like display name, etc.)
     self::update_user_metadata($user, $user_data_for_metadata);
 
-    // Perform auto-login using the WP user ID
-    wp_set_current_user($user->ID);
-    wp_set_auth_cookie($user->ID, true, is_ssl());
+    // Only set the auth cookie if there is no existing WordPress session,
+    // or the existing session already belongs to this same user.
+    // This prevents the auto-login from overwriting an admin's session when
+    // the SupaWP JS fires on a page the admin is browsing.
+    $existing_user_id = false;
+    if (!empty($_COOKIE[LOGGED_IN_COOKIE])) {
+      $existing_user_id = wp_validate_auth_cookie($_COOKIE[LOGGED_IN_COOKIE], 'logged_in');
+    }
+
+    if (!$existing_user_id || (int) $existing_user_id === (int) $user->ID) {
+      wp_set_current_user($user->ID);
+      wp_set_auth_cookie($user->ID, true, is_ssl());
+    }
+
+    self::record_login_attempt('success', '', $email);
 
     do_action('supawp_after_user_login', $user, $supabase_user_data_from_params);
 
@@ -91,17 +118,39 @@ class SupaWP_Rest_Api_User {
     return $decoded_jwt; // <-- Return decoded JWT object
   }
 
+  /**
+   * Store the result of the most recent auto-login attempt as a transient
+   * so it can be surfaced in the admin Security tab for easy debugging.
+   */
+  private static function record_login_attempt($result, $error = '', $email = '') {
+    set_transient('supawp_last_login_attempt', array(
+      'time'   => current_time('mysql'),
+      'result' => $result,
+      'error'  => $error,
+      'email'  => $email,
+    ), DAY_IN_SECONDS);
+  }
+
   private static function validate_request(WP_REST_Request $request) {
     // 1. Validate request origin
-    $site_url = get_site_url();
+    $site_url       = get_site_url();
+    $site_host      = parse_url($site_url, PHP_URL_HOST);           // e.g. postglider.com
     $request_origin = $request->get_header('origin');
+    $origin_host    = $request_origin ? parse_url($request_origin, PHP_URL_HOST) : '';
 
-    // Allow requests originating from the same domain
-    if (empty($request_origin) || parse_url($request_origin, PHP_URL_HOST) !== parse_url($site_url, PHP_URL_HOST)) {
+    // Build the list of trusted origins: same host + any configured app origins.
+    $options         = get_option('supawp_options', array());
+    $app_callback    = isset($options['supawp_app_callback_url']) ? $options['supawp_app_callback_url'] : '';
+    $app_host        = $app_callback ? parse_url($app_callback, PHP_URL_HOST) : '';
+
+    $trusted_hosts   = array_filter(array($site_host, $app_host));
+    $trusted_hosts   = apply_filters('supawp_trusted_origins', $trusted_hosts);
+
+    if (empty($origin_host) || !in_array($origin_host, $trusted_hosts, true)) {
       return new WP_Error(
         'invalid_origin',
         __('Invalid request origin.', 'supawp'),
-        array('status' => 403) // Use 403 Forbidden
+        array('status' => 403)
       );
     }
 
@@ -163,12 +212,12 @@ class SupaWP_Rest_Api_User {
     // validate_supabase_jwt now returns the decoded object on success, or false on failure.
     $decoded_jwt = self::validate_supabase_jwt($auth_header);
 
-    if ($decoded_jwt === false) { // Check specifically for false, as the object itself is truthy
-      error_log("[SupaWP Auto-Login] JWT validation failed (returned false).");
+    if (is_string($decoded_jwt)) { // Error string returned instead of decoded object
+      error_log("[SupaWP Auto-Login] JWT validation failed: " . $decoded_jwt);
       return new WP_Error(
         'invalid_token',
         __('Invalid authentication token.', 'supawp'),
-        array('status' => 401)
+        array('status' => 401, 'detail' => $decoded_jwt)
       );
     }
 
@@ -195,16 +244,12 @@ class SupaWP_Rest_Api_User {
       $user = get_user_by('id', $user_ids[0]);
       // Ensure user email matches if found by UID (security check)
       if ($user && strtolower($user->user_email) === strtolower($email)) {
-        // Update password silently if needed (e.g., if user was created manually before)
-        // Only update if a password was sent, otherwise leave existing WP password
-        if ($password_from_payload !== null) {
-          wp_set_password($password_from_payload, $user->ID);
-        }
+        // Never call wp_set_password on login — it destroys all active sessions
+        // (wp_destroy_all_sessions) which logs the user out everywhere.
+        // WordPress passwords are irrelevant when auth is handled by Supabase JWT.
         return $user;
       } else if ($user) {
-        // Log potential UID conflict
         error_log("[SupaWP Auto-Login] Potential UID conflict: UID {$supabase_uid} exists but email does not match ({$user->user_email} vs {$email}).");
-        // Decide how to handle: block, update email, etc. For now, block.
         return new WP_Error('uid_email_mismatch', __('Authentication conflict.', 'supawp'), array('status' => 409));
       }
     }
@@ -212,12 +257,9 @@ class SupaWP_Rest_Api_User {
     // Priority 2: Find user by email
     $user = get_user_by('email', $email);
     if ($user) {
-      // User found by email, associate Supabase UID
+      // User found by email — associate Supabase UID if not already set.
+      // Do NOT call wp_set_password here: it would destroy all active sessions.
       update_user_meta($user->ID, 'supabase_uid', $supabase_uid);
-      // Set password for this user if provided
-      if ($password_from_payload !== null) {
-        wp_set_password($password_from_payload, $user->ID);
-      }
       return $user;
     }
 
@@ -294,58 +336,205 @@ class SupaWP_Rest_Api_User {
 
   /**
    * Validates the Supabase JWT from the Authorization header.
+   * Automatically handles both HS256 (secret-based) and RS256 (JWKS public key) tokens.
    *
    * @param string|null $auth_header The Authorization header value (e.g., "Bearer <token>").
-   * @return object|false The decoded payload object on success, false otherwise.
+   * @return object|string The decoded payload object on success, or an error string on failure.
    */
   private static function validate_supabase_jwt($auth_header) {
     if (empty($auth_header)) {
       error_log("[SupaWP Auto-Login] JWT Validation Error: Authorization header missing.");
-      return false;
+      return 'Authorization header missing — the server may be stripping it. Check .htaccess or server config.';
     }
 
     if (!preg_match('/^Bearer\\s+(.+)$/i', $auth_header, $matches)) {
       error_log("[SupaWP Auto-Login] JWT Validation Error: Malformed Authorization header.");
-      return false;
+      return 'Malformed Authorization header (expected: Bearer <token>).';
     }
 
     $token = $matches[1];
     if (empty($token)) {
       error_log("[SupaWP Auto-Login] JWT Validation Error: Token missing from Authorization header.");
-      return false;
+      return 'Token is empty inside the Authorization header.';
     }
 
-    // Retrieve the secret from settings
+    // Peek at the token header (no verification) to determine which algorithm was used
+    $parts = explode('.', $token);
+    if (count($parts) !== 3) {
+      return 'Malformed JWT — expected 3 dot-separated parts.';
+    }
+
+    $header_data  = strlen($parts[0]) % 4;
+    $padded       = $header_data ? $parts[0] . str_repeat('=', 4 - $header_data) : $parts[0];
+    $header       = json_decode(base64_decode(strtr($padded, '-_', '+/')), true);
+    $alg          = isset($header['alg']) ? $header['alg'] : 'HS256';
+
+    error_log("[SupaWP Auto-Login] Token algorithm detected: " . $alg);
+
+    // RS256, ES256, and other asymmetric algorithms all verify via the JWKS public key endpoint
+    if (in_array($alg, ['RS256', 'ES256', 'PS256'], true)) {
+      return self::validate_jwt_rs256($token);
+    }
+
+    // HS256 path — use the stored JWT secret
     $secret = isset(self::$options_settings['supawp_jwt_secret']) ? trim(self::$options_settings['supawp_jwt_secret']) : '';
 
     if (empty($secret)) {
       error_log("[SupaWP Auto-Login] JWT Validation Error: Supabase JWT Secret is not configured in settings.");
-      // Consider returning a WP_Error here if more context is needed upstream,
-      // but for a simple boolean validation function, false is okay.
-      return false;
+      return 'JWT Secret is not configured in SupaWP settings.';
     }
 
     try {
-      // Attempt to decode the token
-      // The Key object takes the secret and the algorithm
       $decoded = JWT::decode($token, new Key($secret, 'HS256'));
-
-      // Optionally, perform additional checks on the decoded payload if needed
-      // For example, check issuer (iss), audience (aud), specific claims etc.
-      // if ($decoded->iss !== 'expected_issuer') return false;
-
-      // Log the full decoded payload for debugging
-      error_log("[SupaWP Auto-Login] JWT Validation Success. UID: " . (isset($decoded->sub) ? $decoded->sub : 'N/A'));
-      return $decoded; // <-- Return decoded object
+      error_log("[SupaWP Auto-Login] JWT Validation Success (HS256). UID: " . (isset($decoded->sub) ? $decoded->sub : 'N/A'));
+      return $decoded;
     } catch (ExpiredException $e) {
-      error_log("[SupaWP Auto-Login] JWT Validation Error: Token has expired. Message: " . $e->getMessage());
-      return false;
+      error_log("[SupaWP Auto-Login] JWT Validation Error: Token has expired. " . $e->getMessage());
+      return 'Token has expired: ' . $e->getMessage();
     } catch (SignatureInvalidException $e) {
-      error_log("[SupaWP Auto-Login] JWT Validation Error: Signature verification failed. Message: " . $e->getMessage());
-      return false;
-    } catch (\Exception $e) { // Catch any other JWT or general exceptions
-      error_log("[SupaWP Auto-Login] JWT Validation Error: An error occurred during decoding. Message: " . $e->getMessage());
-      return false;
+      error_log("[SupaWP Auto-Login] JWT Validation Error: Signature invalid. " . $e->getMessage());
+      return 'Signature verification failed — JWT Secret does not match. ' . $e->getMessage();
+    } catch (\Exception $e) {
+      error_log("[SupaWP Auto-Login] JWT Validation Error: " . $e->getMessage());
+      return 'JWT HS256 decode error (token header alg=' . esc_html($alg) . '): ' . $e->getMessage();
+    }
+  }
+
+  /**
+   * GET /wp-json/supawp/v1/auth/session?token={jwt}&return_to={url}
+   *
+   * The browser navigates here directly after Supabase auth (not a background fetch),
+   * so WordPress can set its auth cookie with SameSite=Lax without any cross-origin
+   * restrictions. After the cookie is set, the user is redirected to return_to.
+   *
+   * return_to is validated against the same trusted-host list used by auto-login
+   * to prevent open-redirect attacks.
+   */
+  public static function handle_session_redirect(WP_REST_Request $request) {
+    $token     = sanitize_text_field($request->get_param('token'));
+    $return_to = $request->get_param('return_to'); // validated below, not sanitized yet
+
+    // Require a token
+    if (empty($token)) {
+      wp_die(
+        __('Missing authentication token.', 'supawp'),
+        __('Auth Error', 'supawp'),
+        array('response' => 400)
+      );
+    }
+
+    // Validate return_to host against the trusted list (open-redirect protection)
+    $options      = get_option('supawp_options', array());
+    $app_callback = isset($options['supawp_app_callback_url']) ? $options['supawp_app_callback_url'] : '';
+    $app_host     = $app_callback ? parse_url($app_callback, PHP_URL_HOST) : '';
+    $site_host    = parse_url(get_site_url(), PHP_URL_HOST);
+
+    $trusted_hosts = array_filter(array($site_host, $app_host));
+    $trusted_hosts = apply_filters('supawp_trusted_origins', $trusted_hosts);
+
+    $return_host = $return_to ? parse_url($return_to, PHP_URL_HOST) : '';
+    if (empty($return_host) || !in_array($return_host, $trusted_hosts, true)) {
+      $return_to = home_url('/'); // safe fallback
+    }
+
+    // Validate the JWT
+    $decoded_jwt = self::validate_supabase_jwt('Bearer ' . $token);
+    if (is_string($decoded_jwt)) {
+      error_log('[SupaWP Session] JWT validation failed: ' . $decoded_jwt);
+      self::record_login_attempt('failed', 'invalid_token: ' . $decoded_jwt);
+      wp_die(
+        sprintf(__('Authentication failed: %s', 'supawp'), esc_html($decoded_jwt)),
+        __('Auth Error', 'supawp'),
+        array('response' => 401)
+      );
+    }
+
+    $supabase_uid = isset($decoded_jwt->sub)   ? sanitize_text_field($decoded_jwt->sub)   : null;
+    $email        = isset($decoded_jwt->email) ? sanitize_email($decoded_jwt->email)       : null;
+
+    if (empty($supabase_uid) || empty($email)) {
+      wp_die(
+        __('Invalid token: missing required claims.', 'supawp'),
+        __('Auth Error', 'supawp'),
+        array('response' => 400)
+      );
+    }
+
+    $user = self::get_or_create_user($supabase_uid, $email, null);
+    if (is_wp_error($user)) {
+      wp_die(
+        esc_html($user->get_error_message()),
+        __('Auth Error', 'supawp'),
+        array('response' => 500)
+      );
+    }
+
+    // Set the WordPress session. Because this is a direct browser navigation to
+    // postglider.com (not a cross-origin fetch), SameSite=Lax cookies are stored.
+    wp_set_current_user($user->ID);
+    wp_set_auth_cookie($user->ID, true, is_ssl());
+
+    // The Supabase client on this WordPress domain will see SIGNED_OUT (the real
+    // session lives on the external app's origin). Mark this session so the
+    // frontend-logout handler doesn't immediately undo the cookie we just set.
+    $ttl = apply_filters('supawp_cross_domain_session_ttl', 8 * HOUR_IN_SECONDS);
+    set_transient('supawp_cross_domain_' . $user->ID, 1, $ttl);
+
+    self::record_login_attempt('success', '', $email);
+    do_action('supawp_after_user_login', $user, array());
+
+    wp_redirect(esc_url_raw($return_to));
+    exit;
+  }
+
+  /**
+   * Validate an RS256 Supabase JWT using the project's public JWKS endpoint.
+   * Keys are cached for one hour to avoid a remote fetch on every login.
+   *
+   * @param string $token Raw JWT string.
+   * @return object|string Decoded payload on success, error string on failure.
+   */
+  private static function validate_jwt_rs256($token) {
+    $supabase_url = isset(self::$options_settings['supawp_supabase_url'])
+      ? rtrim(trim(self::$options_settings['supawp_supabase_url']), '/')
+      : '';
+
+    if (empty($supabase_url)) {
+      return 'RS256 token received but Supabase URL is not configured — cannot fetch public keys.';
+    }
+
+    // Attempt to load cached JWKS first
+    $cache_key = 'supawp_jwks_' . md5($supabase_url);
+    $jwks      = get_transient($cache_key);
+
+    if (empty($jwks)) {
+      $jwks_url = $supabase_url . '/auth/v1/.well-known/jwks.json';
+      $response = wp_remote_get($jwks_url, array('timeout' => 10));
+
+      if (is_wp_error($response)) {
+        return 'Failed to fetch Supabase JWKS: ' . $response->get_error_message();
+      }
+
+      $body = json_decode(wp_remote_retrieve_body($response), true);
+
+      if (empty($body['keys'])) {
+        return 'Invalid or empty JWKS response from ' . $jwks_url;
+      }
+
+      $jwks = $body;
+      set_transient($cache_key, $jwks, HOUR_IN_SECONDS);
+      error_log("[SupaWP Auto-Login] JWKS fetched and cached from " . $jwks_url);
+    }
+
+    try {
+      $key_set = \Firebase\JWT\JWK::parseKeySet($jwks);
+      $decoded = JWT::decode($token, $key_set);
+      error_log("[SupaWP Auto-Login] JWT Validation Success (RS256). UID: " . (isset($decoded->sub) ? $decoded->sub : 'N/A'));
+      return $decoded;
+    } catch (ExpiredException $e) {
+      return 'Token has expired: ' . $e->getMessage();
+    } catch (\Exception $e) {
+      return 'RS256 JWT decode error: ' . $e->getMessage();
     }
   }
 }
