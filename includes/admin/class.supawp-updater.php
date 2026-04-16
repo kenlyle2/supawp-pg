@@ -16,7 +16,10 @@ class SupaWP_Admin_Updater {
 
   const METADATA_URL = 'https://raw.githubusercontent.com/kenlyle2/supawp-pg/main/metadata.json';
   const PLUGIN_SLUG  = 'supawp';
-  const PLUGIN_FILE  = 'supawp/init.php';
+
+  private static function plugin_file(): string {
+    return plugin_basename(SUPAWP_PLUGIN_FILE);
+  }
 
   public static function init() {
     if (!self::$initiated) {
@@ -43,9 +46,10 @@ class SupaWP_Admin_Updater {
     if (!$metadata || empty($metadata->version)) return $transient;
 
     if (version_compare($metadata->version, SUPAWP_VERSION, '>')) {
-      $transient->response[self::PLUGIN_FILE] = (object) [
+      $plugin_file = self::plugin_file();
+      $transient->response[$plugin_file] = (object) [
         'slug'         => self::PLUGIN_SLUG,
-        'plugin'       => self::PLUGIN_FILE,
+        'plugin'       => $plugin_file,
         'new_version'  => $metadata->version,
         'url'          => 'https://github.com/kenlyle2/supawp-pg',
         'package'      => $metadata->download_url,

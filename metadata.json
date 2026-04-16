@@ -1,11 +1,11 @@
 {
   "name": "SupaWP-PG",
   "slug": "supawp",
-  "version": "1.13.1",
+  "version": "1.13.2",
   "requires": "6.0",
   "requires_php": "7.4",
-  "download_url": "https://github.com/kenlyle2/supawp-pg/releases/download/v1.13.1/supawp.zip",
+  "download_url": "https://github.com/kenlyle2/supawp-pg/releases/download/v1.13.2/supawp.zip",
   "sections": {
-    "changelog": "<h4>1.13.1</h4><ul><li>Fix: add missing check_for_update() method — caused fatal error on SupaWP settings page</li></ul><h4>1.13.0</h4><ul><li>Switch to numeric versioning; replace techcater updater with GitHub-release updater</li></ul>"
+    "changelog": "<h4>1.13.2</h4><ul><li>Fix: use plugin_basename() for update transient key so WordPress correctly detects available updates</li></ul><h4>1.13.1</h4><ul><li>Fix: add missing check_for_update() method — caused fatal error on SupaWP settings page</li></ul><h4>1.13.0</h4><ul><li>Switch to numeric versioning; replace techcater updater with GitHub-release updater</li></ul>"
   }
 }
