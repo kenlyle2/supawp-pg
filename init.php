@@ -15,7 +15,7 @@
  * Author URI:   https://techcater.com
  * Contributors: Tech Cater (@techcater)
  *
- * Version:      1.12.0t
+ * Version:      1.13.0
  * Tested up to: 6.8.3
  * Requires PHP: 7.4
  *
@@ -43,7 +43,7 @@ if (!function_exists('add_action')) {
   exit;
 }
 
-define('SUPAWP_VERSION', '1.12.0t');
+define('SUPAWP_VERSION', '1.13.0');
 define('SUPAWP_MINIMUM_WP_VERSION', '5.0.0');
 define('SUPAWP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SUPAWP_PLUGIN_URL', plugin_dir_url(__FILE__));
