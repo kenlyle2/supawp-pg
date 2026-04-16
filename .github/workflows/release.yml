@@ -1,0 +1,31 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build zip
+        run: |
+          mkdir -p /tmp/wp-plugin
+          rsync -a --exclude='.git' --exclude='.github' --exclude='vendor/*/tests' \
+            ./ /tmp/wp-plugin/supawp/
+          cd /tmp/wp-plugin
+          zip -r $GITHUB_WORKSPACE/supawp.zip supawp/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: supawp.zip
+          generate_release_notes: false
+          body: |
+            See [metadata.json](https://github.com/${{ github.repository }}/blob/main/metadata.json) for changelog.
