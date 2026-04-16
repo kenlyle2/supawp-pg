@@ -26,6 +26,16 @@ class SupaWP_Admin_Updater {
     }
   }
 
+  /**
+   * Called directly by the admin settings page to surface an update notice.
+   * Returns the metadata object if a newer version exists, false otherwise.
+   */
+  public static function check_for_update(): object|false {
+    $metadata = self::fetch_metadata();
+    if (!$metadata || empty($metadata->version)) return false;
+    return version_compare($metadata->version, SUPAWP_VERSION, '>') ? $metadata : false;
+  }
+
   public static function check_update($transient) {
     if (empty($transient->checked)) return $transient;
 
