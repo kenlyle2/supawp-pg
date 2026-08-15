@@ -469,6 +469,18 @@ class SupaWP_Rest_Api_User {
       );
     }
 
+    // Clear any pre-existing auth cookie FIRST, unconditionally, before setting the new one.
+    // wp_set_auth_cookie() overwrites cookies of the same name/scheme, but a browser that
+    // already holds a stale cookie from a DIFFERENT scheme (SSL vs non-SSL — is_ssl() can
+    // differ between logins) or a previous WP session predating a site config change can end
+    // up with two auth cookies alive at once, and WP reads whichever one it happens to check
+    // first. That produces "works in a fresh/incognito browser, silently misbehaves in a
+    // normal tab that already has postglider.com history" — exactly the class of bug reported
+    // 2026-08-15 (freelancerprabira@gmail.com). wp_clear_auth_cookie() guarantees every login
+    // through this bridge starts from the same clean-slate cookie state incognito gets for free,
+    // regardless of what the browser was already carrying.
+    wp_clear_auth_cookie();
+
     // Set the WordPress session. Because this is a direct browser navigation to
     // postglider.com (not a cross-origin fetch), SameSite=Lax cookies are stored.
     wp_set_current_user($user->ID);

@@ -15,7 +15,7 @@
  * Author URI:   https://techcater.com
  * Contributors: Tech Cater (@techcater)
  *
- * Version:      1.13.2
+ * Version:      1.13.3
  * Tested up to: 6.8.3
  * Requires PHP: 7.4
  *

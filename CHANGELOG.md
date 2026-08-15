@@ -11,6 +11,19 @@ All notable changes to this project will be documented in this file.
 > - :memo: [Documentation]
 > - :nail_care: [Polish]
 
+## [1.13.3] - 2026-08-15
+
+#### - :bug: [Bug Fix]
+
+- `handle_session_redirect()` (the cross-domain SSO bridge from `app.postglider.com`) now calls
+  `wp_clear_auth_cookie()` before `wp_set_auth_cookie()`. A browser already holding a stale or
+  scheme-mismatched auth cookie for `postglider.com` could collide with the freshly-issued one,
+  making login silently misbehave in a normal tab while always working in incognito (which never
+  has a prior cookie to collide with). Reported by freelancerprabira@gmail.com.
+
+*(1.13.0–1.13.2 were released without CHANGELOG.md entries — see `metadata.json`'s changelog
+section for those.)*
+
 ## [1.12.0] - 2026-02-24
 
 #### - :rocket: [New Feature]
