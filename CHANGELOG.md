@@ -11,6 +11,20 @@ All notable changes to this project will be documented in this file.
 > - :memo: [Documentation]
 > - :nail_care: [Polish]
 
+## [1.13.4] - 2026-08-18
+
+#### - :bug: [Bug Fix]
+
+- `get_trusted_hosts()` (used by `validate_request()` and `handle_session_redirect()`) now
+  always includes a code-level canonical app host — `SUPAWP_CANONICAL_APP_HOST` if defined in
+  `wp-config.php`, else the current production default — independent of the admin-panel
+  `supawp_app_callback_url` option. That option has gone stale twice after domain changes
+  (2026-07-14, 2026-08-12), each time silently stranding real trial signups until manually
+  patched via WP-CLI; a future domain change now degrades to "still works" instead.
+- `SUPAWP_VERSION` (the constant `class.supawp-updater.php` actually compares against, not the
+  plugin header's `Version:` line) had drifted one version behind since 1.13.3 — fixed and kept
+  in sync going forward.
+
 ## [1.13.3] - 2026-08-15
 
 #### - :bug: [Bug Fix]

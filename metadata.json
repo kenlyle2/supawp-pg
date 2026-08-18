@@ -1,11 +1,11 @@
 {
   "name": "SupaWP-PG",
   "slug": "supawp",
-  "version": "1.13.3",
+  "version": "1.13.4",
   "requires": "6.0",
   "requires_php": "7.4",
-  "download_url": "https://github.com/kenlyle2/supawp-pg/releases/download/v1.13.3/supawp.zip",
+  "download_url": "https://github.com/kenlyle2/supawp-pg/releases/download/v1.13.4/supawp.zip",
   "sections": {
-    "changelog": "<h4>1.13.3</h4><ul><li>Fix: clear any pre-existing auth cookie before setting a new one in the cross-domain SSO bridge (handle_session_redirect) &mdash; a stale/mismatched cookie already in the browser could collide with the fresh one, causing login to silently fail in a normal browser tab while always working in incognito.</li></ul><h4>1.13.2</h4><ul><li>Fix: use plugin_basename() for update transient key so WordPress correctly detects available updates</li></ul><h4>1.13.1</h4><ul><li>Fix: add missing check_for_update() method \u2014 caused fatal error on SupaWP settings page</li></ul><h4>1.13.0</h4><ul><li>Switch to numeric versioning; replace techcater updater with GitHub-release updater</li></ul>"
+    "changelog": "<h4>1.13.4</h4><ul><li>Fix: add code-level canonical-host fallback (SUPAWP_CANONICAL_APP_HOST constant, defaults to the current production app domain) to supawp_trusted_origins, independent of the admin-panel supawp_app_callback_url option &mdash; that option has gone stale twice after domain changes, each time silently stranding real trial signups until manually patched. Also fixes SUPAWP_VERSION (the constant the updater actually compares against) having drifted one version behind the plugin header since 1.13.3.</li></ul><h4>1.13.3</h4><ul><li>Fix: clear any pre-existing auth cookie before setting a new one in the cross-domain SSO bridge (handle_session_redirect) &mdash; a stale/mismatched cookie already in the browser could collide with the fresh one, causing login to silently fail in a normal browser tab while always working in incognito.</li></ul><h4>1.13.2</h4><ul><li>Fix: use plugin_basename() for update transient key so WordPress correctly detects available updates</li></ul><h4>1.13.1</h4><ul><li>Fix: add missing check_for_update() method — caused fatal error on SupaWP settings page</li></ul><h4>1.13.0</h4><ul><li>Switch to numeric versioning; replace techcater updater with GitHub-release updater</li></ul>"
   }
 }
