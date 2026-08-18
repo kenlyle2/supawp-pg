@@ -131,20 +131,33 @@ class SupaWP_Rest_Api_User {
     ), DAY_IN_SECONDS);
   }
 
+  /**
+   * Trusted-host list for origin/redirect validation: same-host + the admin-panel
+   * `supawp_app_callback_url` option + a code-level canonical app host that survives
+   * a stale/unset admin option. The admin option has gone stale twice (D-2026-07-14l,
+   * 2026-08-12) after domain changes, each time silently stranding real trial signups
+   * until someone noticed and manually patched the option via WP-CLI. Define
+   * SUPAWP_CANONICAL_APP_HOST in wp-config.php to override; falls back to the current
+   * production app domain so a third domain change degrades to "still works" instead
+   * of silently breaking the auto-login/redirect flow again.
+   */
+  private static function get_trusted_hosts() {
+    $site_host    = parse_url(get_site_url(), PHP_URL_HOST);
+    $options      = get_option('supawp_options', array());
+    $app_callback = isset($options['supawp_app_callback_url']) ? $options['supawp_app_callback_url'] : '';
+    $app_host     = $app_callback ? parse_url($app_callback, PHP_URL_HOST) : '';
+    $canonical_host = defined('SUPAWP_CANONICAL_APP_HOST') ? SUPAWP_CANONICAL_APP_HOST : 'app.postglider.com';
+
+    $trusted_hosts = array_filter(array($site_host, $app_host, $canonical_host));
+    return apply_filters('supawp_trusted_origins', $trusted_hosts);
+  }
+
   private static function validate_request(WP_REST_Request $request) {
     // 1. Validate request origin
-    $site_url       = get_site_url();
-    $site_host      = parse_url($site_url, PHP_URL_HOST);           // e.g. postglider.com
     $request_origin = $request->get_header('origin');
     $origin_host    = $request_origin ? parse_url($request_origin, PHP_URL_HOST) : '';
 
-    // Build the list of trusted origins: same host + any configured app origins.
-    $options         = get_option('supawp_options', array());
-    $app_callback    = isset($options['supawp_app_callback_url']) ? $options['supawp_app_callback_url'] : '';
-    $app_host        = $app_callback ? parse_url($app_callback, PHP_URL_HOST) : '';
-
-    $trusted_hosts   = array_filter(array($site_host, $app_host));
-    $trusted_hosts   = apply_filters('supawp_trusted_origins', $trusted_hosts);
+    $trusted_hosts = self::get_trusted_hosts();
 
     if (empty($origin_host) || !in_array($origin_host, $trusted_hosts, true)) {
       return new WP_Error(
@@ -424,13 +437,7 @@ class SupaWP_Rest_Api_User {
     }
 
     // Validate return_to host against the trusted list (open-redirect protection)
-    $options      = get_option('supawp_options', array());
-    $app_callback = isset($options['supawp_app_callback_url']) ? $options['supawp_app_callback_url'] : '';
-    $app_host     = $app_callback ? parse_url($app_callback, PHP_URL_HOST) : '';
-    $site_host    = parse_url(get_site_url(), PHP_URL_HOST);
-
-    $trusted_hosts = array_filter(array($site_host, $app_host));
-    $trusted_hosts = apply_filters('supawp_trusted_origins', $trusted_hosts);
+    $trusted_hosts = self::get_trusted_hosts();
 
     $return_host = $return_to ? parse_url($return_to, PHP_URL_HOST) : '';
     if (empty($return_host) || !in_array($return_host, $trusted_hosts, true)) {
